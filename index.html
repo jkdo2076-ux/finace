@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1f4539" />
+  <title>เบาเบา — เห็นเงินชัด วางแผนได้เบาขึ้น</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="#overview"><span class="sprout">♧</span><span><b>เบาเบา</b><small>BAOBAO</small></span></a>
+    <p class="eyebrow side-label">MY MONEY SPACE</p>
+    <nav aria-label="เมนูหลัก">
+      <button class="nav active" data-page="overview">▦ <span>ภาพรวมการเงิน</span></button>
+      <button class="nav" data-page="transactions">⇄ <span>รายการเงินเข้า–ออก</span><i id="transaction-count"></i></button>
+      <button class="nav" data-page="bills">▣ <span>บิลและรายได้ประจำ</span></button>
+      <button class="nav" data-page="plan">⌁ <span>แผนเงินของฉัน</span></button>
+      <button class="nav" data-page="assistant">✧ <span>ผู้ช่วยเบาเบา</span></button>
+    </nav>
+    <div class="side-card"><span>♧</span><b>ค่อย ๆ จัด เงินก็เบาลง</b><p>เริ่มจากรู้ว่าเงินไปไหน<br>แล้วค่อยวางแผนในแบบของคุณ</p><button data-page="plan">เริ่มวางแผน　↗</button></div>
+    <button class="nav settings" data-page="settings">⚙ <span>การตั้งค่าและข้อมูล</span></button>
+    <p class="privacy">ข้อมูลเก็บไว้บนอุปกรณ์คุณ</p>
+  </aside>
+  <main>
+    <header><div class="crumb">พื้นที่ของฉัน　/　<span id="crumb">ภาพรวมการเงิน</span></div><div class="header-right">⌾　ไฟล์อยู่บนอุปกรณ์คุณ　　◯ <span class="avatar">บ</span></div></header>
+    <section id="overview" class="page active">
+      <div class="demo-banner"><span>♧　กำลังใช้พื้นที่ส่วนตัวของคุณ</span><button id="load-demo">โหลดข้อมูลตัวอย่าง</button></div>
+      <div class="hero"><div><p class="eyebrow">YOUR MONEY, A LITTLE LIGHTER</p><h1>เห็นเงินชัด วางแผนได้เบาขึ้น.</h1><p>เริ่มจากบันทึกรายการ แล้วค่อย ๆ เห็นว่าเงินไปไหนและควรเตรียมอะไรต่อ</p></div><div class="hero-actions"><input type="month" id="month-picker" /><button class="primary" id="import-btn">↥　นำเข้าสเตตเมนต์</button></div></div>
+      <input id="csv-input" type="file" accept=".csv,text/csv" hidden />
+      <div class="stats">
+        <article><span>รายรับเดือนนี้</span><strong id="income">฿0</strong><small>จากรายการที่บันทึกไว้</small></article>
+        <article><span>รายจ่ายเดือนนี้</span><strong id="expense">฿0</strong><small>ไม่รวมโอนระหว่างบัญชี</small></article>
+        <article class="lime"><span>เงินเหลือจากรายการ</span><strong id="balance">฿0</strong><small>รายรับ − รายจ่าย · ไม่ใช่ยอดในบัญชี</small></article>
+        <article><span>รายจ่ายที่ปรับลดได้</span><strong id="flexible">฿0</strong><small>เปลี่ยนความจำเป็นได้ตามชีวิตคุณ</small></article>
+      </div>
+      <div class="dashboard-grid"><section class="panel chart-panel"><div class="panel-title"><div><h2>เงินเข้า–ออก เป็นยังไงบ้าง?</h2><p>ค่อย ๆ เห็นภาพเงินของคุณในเดือนนี้</p></div><span class="legend">● รายรับ　<span>● รายจ่าย</span></span></div><div class="chart-values"><b id="chart-income">฿0</b><b id="chart-expense">฿0</b></div><div class="bar-chart" id="bar-chart"></div><small>ยอดสะสมจากรายการที่มีในเดือนที่เลือก</small></section>
+        <section class="panel category-panel"><h2>เงินของคุณไปที่ไหน</h2><p>รู้จักรายจ่าย แล้วเลือกปรับในแบบของคุณ</p><div class="donut-row"><div class="donut" id="donut"><span><small>รายจ่ายทั้งหมด</small><b id="donut-total">฿0</b></span></div><ul id="category-list"></ul></div></section></div>
+      <div class="lower-grid"><section class="panel"><div class="panel-title"><div><h2>อย่าลืมเผื่อเงินไว้ให้บิล</h2><p>วันและยอดโดยประมาณ · ตั้งเตือนได้ตามต้องการ</p></div><button class="text-btn" data-page="bills">ดูทั้งหมด</button></div><div id="upcoming-bills" class="bills-preview"></div></section>
+        <section class="panel little-help"><p class="eyebrow">A LITTLE HELP, EVERY DAY</p><h2 id="helper-title">เริ่มบันทึกรายการ ภาพเงินก็ชัดขึ้นอีกนิด</h2><p id="helper-text">คุณรู้จักชีวิตตัวเองดีที่สุด เบาเบาช่วยจัดระเบียบให้</p><button class="primary" data-page="transactions">เพิ่มรายการแรก</button></section></div>
+      <section class="panel latest"><div class="panel-title"><div><h2>รายการล่าสุดของเดือน</h2><p>รายละเอียดเล็ก ๆ ที่ช่วยให้เห็นภาพใหญ่</p></div><button class="text-btn" data-page="transactions">ดูทุกรายการ</button></div><div id="latest-transactions"></div></section>
+    </section>
+    <section id="transactions" class="page"><div class="page-heading"><div><p class="eyebrow">EVERY LITTLE DETAIL</p><h1>รายการเงินเข้า–ออก</h1><p>เพิ่มหรือแก้ไขรายการได้ทุกเมื่อ</p></div><button class="primary" id="add-transaction">＋ เพิ่มรายการ</button></div><div class="toolbar"><input id="search" placeholder="ค้นหารายการ" /><select id="type-filter"><option value="all">ทั้งหมด</option><option value="income">รายรับ</option><option value="expense">รายจ่าย</option></select></div><section class="panel"><div id="transaction-table"></div></section></section>
+    <section id="bills" class="page"><div class="page-heading"><div><p class="eyebrow">MAKE ROOM FOR WHAT'S DUE</p><h1>บิลและรายได้ประจำ</h1><p>ให้เงินก้อนสำคัญมีที่อยู่ในแผนของคุณ</p></div><button class="primary" id="add-bill">＋ เพิ่มบิล</button></div><section class="panel"><div id="bills-list"></div></section></section>
+    <section id="plan" class="page"><div class="page-heading"><div><p class="eyebrow">YOUR PLAN, YOUR PACE</p><h1>แผนเงินของฉัน</h1><p>ตั้งเป้าหมายเล็ก ๆ ที่ไปต่อได้จริง</p></div></div><section class="panel plan-panel"><label>เป้าหมายเงินสำรอง <input id="goal-name" value="เงินสำรองฉุกเฉิน" /></label><label>เป้าหมาย (บาท) <input id="goal-amount" type="number" min="0" /></label><label>เก็บแล้ว (บาท) <input id="saved-amount" type="number" min="0" /></label><button class="primary" id="save-goal">บันทึกแผน</button><div class="progress"><div id="goal-progress"></div></div><p id="goal-summary"></p></section></section>
+    <section id="assistant" class="page"><div class="page-heading"><div><p class="eyebrow">A LITTLE HELP, EVERY DAY</p><h1>ผู้ช่วยเบาเบา</h1><p>ข้อสังเกตง่าย ๆ จากรายการที่คุณบันทึก</p></div></div><section class="panel insights" id="insights"></section></section>
+    <section id="settings" class="page"><div class="page-heading"><div><p class="eyebrow">YOUR DATA, YOUR CONTROL</p><h1>การตั้งค่าและข้อมูล</h1><p>ข้อมูลทั้งหมดบันทึกไว้ในเบราว์เซอร์เครื่องนี้</p></div></div><section class="panel settings-panel"><button id="export-data">ดาวน์โหลดข้อมูลสำรอง (.json)</button><button class="danger" id="clear-data">ล้างข้อมูลทั้งหมด</button><p>การล้างข้อมูลจะลบเฉพาะข้อมูลในเว็บเบราว์เซอร์นี้</p></section></section>
+  </main>
+  <dialog id="transaction-dialog"><form method="dialog" id="transaction-form"><div class="dialog-head"><h2 id="transaction-title">เพิ่มรายการ</h2><button aria-label="ปิด">×</button></div><input type="hidden" id="edit-id" /><label>ชื่อรายการ<input id="t-name" required placeholder="เช่น ค่าอาหารกลางวัน" /></label><div class="form-row"><label>วันที่<input id="t-date" type="date" required /></label><label>ประเภท<select id="t-type"><option value="expense">รายจ่าย</option><option value="income">รายรับ</option></select></label></div><div class="form-row"><label>หมวดหมู่<input id="t-category" list="categories" required placeholder="อาหารและเครื่องดื่ม" /><datalist id="categories"><option>บ้านและที่พัก</option><option>อาหารและเครื่องดื่ม</option><option>การเดินทาง</option><option>ช้อปปิ้ง</option><option>งานประจำ</option><option>งานเสริม</option><option>อื่น ๆ</option></datalist></label><label>จำนวนเงิน<input id="t-amount" type="number" min="0.01" step="0.01" required /></label></div><label class="check"><input id="t-flexible" type="checkbox" /> รายจ่ายนี้ปรับลดได้</label><button class="primary" type="submit">บันทึกรายการ</button></form></dialog>
+  <dialog id="bill-dialog"><form method="dialog" id="bill-form"><div class="dialog-head"><h2>เพิ่มบิลหรือรายได้ประจำ</h2><button aria-label="ปิด">×</button></div><label>ชื่อ<input id="b-name" required /></label><div class="form-row"><label>วันในเดือน<input id="b-day" type="number" min="1" max="31" required /></label><label>จำนวนเงิน<input id="b-amount" type="number" min="0.01" required /></label></div><label>ประเภท<select id="b-type"><option value="expense">บิลรายจ่าย</option><option value="income">รายได้ประจำ</option></select></label><button class="primary" type="submit">บันทึก</button></form></dialog>
+  <script src="app.js"></script>
+</body>
+</html>
