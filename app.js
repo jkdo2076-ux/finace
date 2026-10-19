@@ -65,12 +65,43 @@ $('#month-picker').value=viewMonth; $('#month-picker').onchange=e=>{viewMonth=e.
 $('#save-goal').onclick=()=>{data.goal={name:$('#goal-name').value,amount:Number($('#goal-amount').value),saved:Number($('#saved-amount').value)};save()};
 const status = (message, error = false) => { const el = $('#upload-status'); el.textContent = message; el.classList.toggle('error', error); };
 const parseLine = (line, delimiter) => { const cells=[]; let cell='', quoted=false; for(let i=0;i<line.length;i++){const c=line[i]; if(c==='"'&&line[i+1]==='"'){cell+='"';i++}else if(c==='"'){quoted=!quoted}else if(c===delimiter&&!quoted){cells.push(cell.trim());cell=''}else cell+=c} cells.push(cell.trim()); return cells; };
+const parsePdfDate = (value) => { const match = value.match(/(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})/); if(!match)return null; let [,day,month,year]=match; year=Number(year); if(year>2400)year-=543; if(year<100)year+=2000; const iso=`${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`; return /^\d{4}-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/.test(iso)?iso:null; };
+async function extractPdfTransactions(file) {
+  if (!window.pdfjsLib) throw new Error('ตัวอ่าน PDF ยังไม่พร้อม ลองใหม่อีกครั้ง');
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const pdf = await window.pdfjsLib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+  const rows=[];
+  for(let pageNo=1;pageNo<=pdf.numPages;pageNo++){
+    const page=await pdf.getPage(pageNo), items=(await page.getTextContent()).items, lines=new Map();
+    items.forEach(item=>{const y=Math.round(item.transform[5]/3)*3;const line=lines.get(y)||[];line.push({x:item.transform[4],text:item.str});lines.set(y,line)});
+    [...lines.values()].forEach(line=>rows.push(line.sort((a,b)=>a.x-b.x).map(item=>item.text).join(' ').replace(/\s+/g,' ').trim()));
+  }
+  const transactions=[];
+  rows.forEach(row=>{
+    const date=parsePdfDate(row); if(!date)return;
+    const amounts=[...row.matchAll(/(?:฿|THB\s*)?(-?[\d,]+\.\d{2})/gi)].map(match=>Number(match[1].replace(/,/g,''))).filter(Number.isFinite);
+    if(!amounts.length)return;
+    const amount=amounts[0], name=row.replace(/\d{1,2}[/-]\d{1,2}[/-]\d{2,4}/,'').replace(/(?:฿|THB\s*)?-?[\d,]+\.\d{2}/gi,'').replace(/\s+/g,' ').trim().slice(0,90);
+    if(!name || /balance|ยอดคงเหลือ|opening|closing/i.test(name))return;
+    const expense=amount<0 || /\bdr\b|debit|ถอน|จ่าย|โอนออก/i.test(row);
+    transactions.push({id:crypto.randomUUID(),date,name,amount:Math.abs(amount),category:'รอจัดหมวดหมู่',type:expense?'expense':'income',flexible:false});
+  });
+  return transactions;
+}
 async function importStatement(file) {
   if (!file) return;
-  const supported = /\.(csv|tsv)$/i.test(file.name) || /^(text\/csv|text\/plain|text\/tab-separated-values)$/i.test(file.type);
-  if (!supported) return status('รองรับเฉพาะไฟล์ CSV หรือ TSV เท่านั้น', true);
+  const isPdf = /\.pdf$/i.test(file.name) || file.type==='application/pdf';
+  const supported = isPdf || /\.(csv|tsv)$/i.test(file.name) || /^(text\/csv|text\/plain|text\/tab-separated-values)$/i.test(file.type);
+  if (!supported) return status('รองรับไฟล์ CSV, TSV หรือ PDF เท่านั้น', true);
   if (file.size > 3 * 1024 * 1024) return status('ไฟล์มีขนาดเกิน 3 MB', true);
   status(`กำลังอ่านไฟล์ ${file.name}…`);
+  if (isPdf) {
+    try {
+      const transactions=await extractPdfTransactions(file);
+      if(!transactions.length)return status('อ่าน PDF ได้ แต่ไม่พบรายการที่นำเข้าอัตโนมัติได้ ลองส่งออกสเตตเมนต์เป็น CSV จากธนาคาร',true);
+      data.transactions.push(...transactions); save(); status(`นำเข้า ${transactions.length} รายการจาก PDF แล้ว · ตรวจหมวดหมู่ก่อนใช้งาน`); return;
+    } catch(error) { return status(`อ่าน PDF ไม่สำเร็จ: ${error.message||'ไฟล์อาจมีรหัสผ่านหรือเป็นภาพสแกน'}`,true); }
+  }
   const text = (await file.text()).replace(/^\uFEFF/, '');
   const lines = text.split(/\r?\n/).filter(line => line.trim());
   if (!lines.length) return status('ไฟล์นี้ไม่มีข้อมูล', true);
