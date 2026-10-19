@@ -27,8 +27,8 @@
     <section id="overview" class="page active">
       <div class="demo-banner"><span>♧　กำลังใช้พื้นที่ส่วนตัวของคุณ</span><button id="load-demo">โหลดข้อมูลตัวอย่าง</button></div>
       <div class="hero"><div><p class="eyebrow">YOUR MONEY, A LITTLE LIGHTER</p><h1>เห็นเงินชัด วางแผนได้เบาขึ้น.</h1><p>เริ่มจากบันทึกรายการ แล้วค่อย ๆ เห็นว่าเงินไปไหนและควรเตรียมอะไรต่อ</p></div><div class="hero-actions"><input type="month" id="month-picker" /><button class="primary" id="import-btn">↥　นำเข้าสเตตเมนต์</button></div></div>
-      <input id="csv-input" type="file" accept=".csv,.tsv,text/csv,text/tab-separated-values,text/plain" hidden />
-      <section class="upload-zone" id="upload-zone" aria-label="อัปโหลดสเตตเมนต์"><div class="upload-icon">↥</div><div><b>อัปโหลดสเตตเมนต์ของคุณ</b><p>ลากไฟล์ CSV หรือ TSV มาวางที่นี่ หรือเลือกไฟล์จากอุปกรณ์</p><small>รูปแบบ: วันที่, รายการ, จำนวนเงิน, หมวดหมู่, ประเภท · ขนาดไม่เกิน 3 MB</small></div><button class="secondary" id="choose-file">เลือกไฟล์</button><p class="upload-status" id="upload-status" aria-live="polite"></p></section>
+      <input id="csv-input" type="file" accept=".csv,.tsv,.pdf,text/csv,text/tab-separated-values,text/plain,application/pdf" hidden />
+      <section class="upload-zone" id="upload-zone" aria-label="อัปโหลดสเตตเมนต์"><div class="upload-icon">↥</div><div><b>อัปโหลดสเตตเมนต์ของคุณ</b><p>ลากไฟล์ CSV, TSV หรือ PDF มาวางที่นี่ หรือเลือกไฟล์จากอุปกรณ์</p><small>PDF จะอ่านข้อมูลในไฟล์บนอุปกรณ์คุณ · ขนาดไม่เกิน 3 MB</small></div><button class="secondary" id="choose-file">เลือกไฟล์</button><p class="upload-status" id="upload-status" aria-live="polite"></p></section>
       <div class="stats">
         <article><span>รายรับเดือนนี้</span><strong id="income">฿0</strong><small>จากรายการที่บันทึกไว้</small></article>
         <article><span>รายจ่ายเดือนนี้</span><strong id="expense">฿0</strong><small>ไม่รวมโอนระหว่างบัญชี</small></article>
@@ -49,6 +49,7 @@
   </main>
   <dialog id="transaction-dialog"><form method="dialog" id="transaction-form"><div class="dialog-head"><h2 id="transaction-title">เพิ่มรายการ</h2><button aria-label="ปิด">×</button></div><input type="hidden" id="edit-id" /><label>ชื่อรายการ<input id="t-name" required placeholder="เช่น ค่าอาหารกลางวัน" /></label><div class="form-row"><label>วันที่<input id="t-date" type="date" required /></label><label>ประเภท<select id="t-type"><option value="expense">รายจ่าย</option><option value="income">รายรับ</option></select></label></div><div class="form-row"><label>หมวดหมู่<input id="t-category" list="categories" required placeholder="อาหารและเครื่องดื่ม" /><datalist id="categories"><option>บ้านและที่พัก</option><option>อาหารและเครื่องดื่ม</option><option>การเดินทาง</option><option>ช้อปปิ้ง</option><option>งานประจำ</option><option>งานเสริม</option><option>อื่น ๆ</option></datalist></label><label>จำนวนเงิน<input id="t-amount" type="number" min="0.01" step="0.01" required /></label></div><label class="check"><input id="t-flexible" type="checkbox" /> รายจ่ายนี้ปรับลดได้</label><button class="primary" type="submit">บันทึกรายการ</button></form></dialog>
   <dialog id="bill-dialog"><form method="dialog" id="bill-form"><div class="dialog-head"><h2>เพิ่มบิลหรือรายได้ประจำ</h2><button aria-label="ปิด">×</button></div><label>ชื่อ<input id="b-name" required /></label><div class="form-row"><label>วันในเดือน<input id="b-day" type="number" min="1" max="31" required /></label><label>จำนวนเงิน<input id="b-amount" type="number" min="0.01" required /></label></div><label>ประเภท<select id="b-type"><option value="expense">บิลรายจ่าย</option><option value="income">รายได้ประจำ</option></select></label><button class="primary" type="submit">บันทึก</button></form></dialog>
-  <script src="app.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+  <script src="app.js" defer></script>
 </body>
 </html>
