@@ -27,7 +27,8 @@
     <section id="overview" class="page active">
       <div class="demo-banner"><span>♧　กำลังใช้พื้นที่ส่วนตัวของคุณ</span><button id="load-demo">โหลดข้อมูลตัวอย่าง</button></div>
       <div class="hero"><div><p class="eyebrow">YOUR MONEY, A LITTLE LIGHTER</p><h1>เห็นเงินชัด วางแผนได้เบาขึ้น.</h1><p>เริ่มจากบันทึกรายการ แล้วค่อย ๆ เห็นว่าเงินไปไหนและควรเตรียมอะไรต่อ</p></div><div class="hero-actions"><input type="month" id="month-picker" /><button class="primary" id="import-btn">↥　นำเข้าสเตตเมนต์</button></div></div>
-      <input id="csv-input" type="file" accept=".csv,text/csv" hidden />
+      <input id="csv-input" type="file" accept=".csv,.tsv,text/csv,text/tab-separated-values,text/plain" hidden />
+      <section class="upload-zone" id="upload-zone" aria-label="อัปโหลดสเตตเมนต์"><div class="upload-icon">↥</div><div><b>อัปโหลดสเตตเมนต์ของคุณ</b><p>ลากไฟล์ CSV หรือ TSV มาวางที่นี่ หรือเลือกไฟล์จากอุปกรณ์</p><small>รูปแบบ: วันที่, รายการ, จำนวนเงิน, หมวดหมู่, ประเภท · ขนาดไม่เกิน 3 MB</small></div><button class="secondary" id="choose-file">เลือกไฟล์</button><p class="upload-status" id="upload-status" aria-live="polite"></p></section>
       <div class="stats">
         <article><span>รายรับเดือนนี้</span><strong id="income">฿0</strong><small>จากรายการที่บันทึกไว้</small></article>
         <article><span>รายจ่ายเดือนนี้</span><strong id="expense">฿0</strong><small>ไม่รวมโอนระหว่างบัญชี</small></article>
