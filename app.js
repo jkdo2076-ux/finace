@@ -63,6 +63,38 @@ $('#add-transaction').onclick=()=>openTransaction(); $('#transaction-form').onsu
 $('#add-bill').onclick=()=>$('#bill-dialog').showModal(); $('#bill-form').onsubmit=e=>{e.preventDefault();data.bills.push({id:crypto.randomUUID(),name:$('#b-name').value.trim(),day:Number($('#b-day').value),amount:Number($('#b-amount').value),type:$('#b-type').value});$('#bill-dialog').close();save();};
 $('#month-picker').value=viewMonth; $('#month-picker').onchange=e=>{viewMonth=e.target.value;render()}; $('#search').oninput=renderTransactions; $('#type-filter').onchange=renderTransactions;
 $('#save-goal').onclick=()=>{data.goal={name:$('#goal-name').value,amount:Number($('#goal-amount').value),saved:Number($('#saved-amount').value)};save()};
-$('#import-btn').onclick=()=>$('#csv-input').click(); $('#csv-input').onchange=async e=>{const file=e.target.files[0];if(!file)return;const text=await file.text();const lines=text.split(/\r?\n/).filter(Boolean);const first=lines[0].toLowerCase();const start=first.includes('date')||first.includes('วันที่')?1:0;let added=0;lines.slice(start).forEach(line=>{const cols=line.split(',').map(x=>x.trim().replace(/^"|"$/g,''));if(cols.length<3)return;const [date,name,amount,category='อื่น ๆ',type='expense']=cols;const n=Number(String(amount).replace(/[^\d.-]/g,''));if(!date||!name||!Number.isFinite(n))return;data.transactions.push({id:crypto.randomUUID(),date,name,amount:Math.abs(n),category,type:n<0?'expense':(type.toLowerCase().includes('income')?'income':'expense'),flexible:false});added++});if(added){save();alert(`นำเข้า ${added} รายการแล้ว`)}else alert('ไม่พบข้อมูลที่นำเข้าได้ — ใช้รูปแบบ: date,name,amount,category,type');e.target.value=''};
+const status = (message, error = false) => { const el = $('#upload-status'); el.textContent = message; el.classList.toggle('error', error); };
+const parseLine = (line, delimiter) => { const cells=[]; let cell='', quoted=false; for(let i=0;i<line.length;i++){const c=line[i]; if(c==='"'&&line[i+1]==='"'){cell+='"';i++}else if(c==='"'){quoted=!quoted}else if(c===delimiter&&!quoted){cells.push(cell.trim());cell=''}else cell+=c} cells.push(cell.trim()); return cells; };
+async function importStatement(file) {
+  if (!file) return;
+  const supported = /\.(csv|tsv)$/i.test(file.name) || /^(text\/csv|text\/plain|text\/tab-separated-values)$/i.test(file.type);
+  if (!supported) return status('รองรับเฉพาะไฟล์ CSV หรือ TSV เท่านั้น', true);
+  if (file.size > 3 * 1024 * 1024) return status('ไฟล์มีขนาดเกิน 3 MB', true);
+  status(`กำลังอ่านไฟล์ ${file.name}…`);
+  const text = (await file.text()).replace(/^\uFEFF/, '');
+  const lines = text.split(/\r?\n/).filter(line => line.trim());
+  if (!lines.length) return status('ไฟล์นี้ไม่มีข้อมูล', true);
+  const delimiter = file.name.toLowerCase().endsWith('.tsv') || (lines[0].match(/\t/g)||[]).length > (lines[0].match(/,/g)||[]).length ? '\t' : ',';
+  const first = lines[0].toLowerCase();
+  const start = /date|วันที่|transaction|รายการ/.test(first) ? 1 : 0;
+  let added = 0, skipped = 0;
+  lines.slice(start).forEach(line => {
+    const cols = parseLine(line, delimiter);
+    if (cols.length < 3) { skipped++; return; }
+    let [date,name,amount,category='อื่น ๆ',type='expense'] = cols;
+    const n = Number(String(amount).replace(/[^\d.-]/g,''));
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !name || !Number.isFinite(n)) { skipped++; return; }
+    data.transactions.push({id:crypto.randomUUID(),date,name,amount:Math.abs(n),category:category||'อื่น ๆ',type:n<0?'expense':(/income|รายรับ/i.test(type)?'income':'expense'),flexible:false});
+    added++;
+  });
+  if (added) { save(); status(`นำเข้า ${added} รายการจาก ${file.name}${skipped ? ` · ข้าม ${skipped} แถวที่อ่านไม่ได้` : ''}`); }
+  else status('ไม่พบรายการที่นำเข้าได้ — ใช้วันที่รูปแบบ YYYY-MM-DD', true);
+}
+const fileInput = $('#csv-input'), dropZone = $('#upload-zone');
+$('#import-btn').onclick = () => fileInput.click(); $('#choose-file').onclick = () => fileInput.click();
+fileInput.onchange = async e => { await importStatement(e.target.files[0]); e.target.value=''; };
+['dragenter','dragover'].forEach(event => dropZone.addEventListener(event, e => { e.preventDefault(); dropZone.classList.add('dragging'); }));
+['dragleave','drop'].forEach(event => dropZone.addEventListener(event, e => { e.preventDefault(); dropZone.classList.remove('dragging'); }));
+dropZone.addEventListener('drop', async e => { await importStatement(e.dataTransfer.files[0]); });
 $('#load-demo').onclick=demoData; $('#export-data').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='baobao-backup.json';a.click();URL.revokeObjectURL(a.href)}; $('#clear-data').onclick=()=>{if(confirm('ล้างข้อมูลทั้งหมดจากเบราว์เซอร์นี้?')){data=structuredClone(defaults);save()}};
 render();
