@@ -8,7 +8,7 @@ const fmtDate = (d) => new Date(`${d}T00:00:00`).toLocaleDateString('th-TH', { d
 const defaults = { transactions: [], bills: [], goal: { name: 'เงินสำรองฉุกเฉิน', amount: 30000, saved: 0 }, aiSummary: '' };
 let data = JSON.parse(localStorage.getItem(storeKey) || 'null') || structuredClone(defaults);
 let viewMonth = isoToday.slice(0, 7);
-let geminiApiKey = '';
+let geminiApiKey = sessionStorage.getItem('baobao-gemini-api-key') || '';
 const save = () => { localStorage.setItem(storeKey, JSON.stringify(data)); render(); };
 const monthItems = () => data.transactions.filter(t => t.date?.startsWith(viewMonth));
 const expenseItems = () => monthItems().filter(t => t.type === 'expense');
@@ -148,5 +148,10 @@ fileInput.onchange = async e => { await importStatement(e.target.files[0]); e.ta
 ['dragleave','drop'].forEach(event => dropZone.addEventListener(event, e => { e.preventDefault(); dropZone.classList.remove('dragging'); }));
 dropZone.addEventListener('drop', async e => { await importStatement(e.dataTransfer.files[0]); });
 $('#load-demo').onclick=demoData; $('#export-data').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='baobao-backup.json';a.click();URL.revokeObjectURL(a.href)}; $('#clear-data').onclick=()=>{if(confirm('ล้างข้อมูลทั้งหมดจากเบราว์เซอร์นี้?')){data=structuredClone(defaults);save()}};
-$('#gemini-api-key').oninput=e=>{geminiApiKey=e.target.value.trim();};
+const geminiInput = $('#gemini-api-key');
+const renderGeminiStatus = () => { const ready=Boolean(geminiApiKey); $('#gemini-key-status').textContent=ready?'● Gemini พร้อมวิเคราะห์ PDF':'● ยังไม่ได้ตั้งค่า Gemini'; $('#gemini-key-status').classList.toggle('ready',ready); };
+geminiInput.value=geminiApiKey;
+geminiInput.oninput=e=>{geminiApiKey=e.target.value.trim(); if(geminiApiKey)sessionStorage.setItem('baobao-gemini-api-key',geminiApiKey);else sessionStorage.removeItem('baobao-gemini-api-key');renderGeminiStatus();};
+$('#clear-gemini-key').onclick=()=>{geminiApiKey='';geminiInput.value='';sessionStorage.removeItem('baobao-gemini-api-key');renderGeminiStatus();};
+renderGeminiStatus();
 render();
